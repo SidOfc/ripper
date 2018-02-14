@@ -1,0 +1,13 @@
+name: ripper
+version: 0.1.0
+
+authors:
+  - Sidney Liebrand <sidneyliebrand@gmail.com>
+
+targets:
+  ripper:
+    main: src/ripper.cr
+
+crystal: 0.23.0+313
+
+license: MIT
