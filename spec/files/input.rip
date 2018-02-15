@@ -9,6 +9,15 @@
     & #there
       color: #09c
 
+      &.yolo
+        width: 200rem
+
+        .hashakjshasjkdhakjsd &
+          display: flex
+
+          .so & #complex
+            height: 100px
+
     &:hover
       color: #28f
 
@@ -22,4 +31,7 @@
     background: #09c
 
   .yeah & .nope
+    user-select: none
+
+  .yeah &.nope
     user-select: none

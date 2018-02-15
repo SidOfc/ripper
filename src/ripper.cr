@@ -29,37 +29,18 @@ module Ripper
     #   &.there         => .hello.there { ... }
     #   .there & .here  => .there .hello .there { ... }
 
-    def expand2
-      if name.starts_with? '&'
-      elsif name.ends_with? '&'
-      elsif name.contains? '&'
-      end
-    end
-
-    def name2
-      tmp_parent = parent
-      return name unless tmp_parent
-      return [tmp_parent.name2, name.tr("&", "")] if name.starts_with?('&')
-    end
-
     def expand
-      names = [] of String
-      npar  = parent
-      eamp  = name.ends_with? '&'
-      names << name unless eamp
+      return @expanded unless @expanded.empty?
 
-      loop do
-        break unless npar
-        break if     npar.root?
+      tmp_parent = parent
+      return @expanded = name unless tmp_parent
+      return @expanded = name if tmp_parent.root?
 
-        names << npar.name
-        npar   = npar.parent
-      end
+      return @expanded = [tmp_parent.expand, name.tr("&", "")].join if name.starts_with? '&'
+      return @expanded = [name.tr("&", ""), tmp_parent.expand].join if name.ends_with? '&'
+      return @expanded = name.sub "&", tmp_parent.expand            if name.includes? '&'
 
-      names << name if eamp
-      names.reverse!
-
-      names.join.tr "&", ""
+      @expanded = [tmp_parent.expand, name].join
     end
 
     def root?
@@ -119,7 +100,6 @@ module Ripper
     result = ""
 
     unless selector.root? || selector.properties.none?
-      puts selector.name2
       result += selector.expand + " {\n"
       selector.properties.each do |prop|
         result += "  " + prop.lstrip + ";\n"
