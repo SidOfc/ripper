@@ -10,3 +10,12 @@
 .hello.yeah #where {
   box-shadow: 10px 10px #09c;
 }
+.yeah .hello {
+  background: #09c;
+}
+.yeah.hello {
+  background: #09c;
+}
+.yeah.hello .nope {
+  user-select: none;
+}

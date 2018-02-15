@@ -24,11 +24,29 @@ module Ripper
       @indent     = @line.partition(/^\s*/)[1].size
     end
 
-    def expand
-      return @expanded unless @expanded.empty?
+    # .hello
+    #   & .there        => .hello .there { ... }
+    #   &.there         => .hello.there { ... }
+    #   .there & .here  => .there .hello .there { ... }
 
-      names = [name] of String
+    def expand2
+      if name.starts_with? '&'
+      elsif name.ends_with? '&'
+      elsif name.contains? '&'
+      end
+    end
+
+    def name2
+      tmp_parent = parent
+      return name unless tmp_parent
+      return [tmp_parent.name2, name.tr("&", "")] if name.starts_with?('&')
+    end
+
+    def expand
+      names = [] of String
       npar  = parent
+      eamp  = name.ends_with? '&'
+      names << name unless eamp
 
       loop do
         break unless npar
@@ -38,15 +56,10 @@ module Ripper
         npar   = npar.parent
       end
 
-      names.reverse.reduce @expanded do |selector, name|
-        if name.starts_with? "&"
-          selector += name.tr "&", ""
-        else
-          selector += " " + name
-        end
+      names << name if eamp
+      names.reverse!
 
-        selector
-      end.lstrip
+      names.join.tr "&", ""
     end
 
     def root?
@@ -106,6 +119,7 @@ module Ripper
     result = ""
 
     unless selector.root? || selector.properties.none?
+      puts selector.name2
       result += selector.expand + " {\n"
       selector.properties.each do |prop|
         result += "  " + prop.lstrip + ";\n"

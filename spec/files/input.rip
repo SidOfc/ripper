@@ -9,5 +9,17 @@
     & #there
       color: #09c
 
+    &:hover
+      color: #28f
+
     #where
       box-shadow: 10px 10px #09c
+
+  .yeah &
+    background: #09c
+
+  .yeah&
+    background: #09c
+
+  .yeah & .nope
+    user-select: none
