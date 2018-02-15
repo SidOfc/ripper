@@ -7,7 +7,19 @@
 .hello.yeah #there {
   color: #09c;
 }
-.hello.yeah #where {
+.hello.yeah #there.yolo {
+  width: 200rem;
+}
+.hashakjshasjkdhakjsd .hello.yeah #there.yolo {
+  display: flex;
+}
+.so .hashakjshasjkdhakjsd .hello.yeah #there.yolo #complex {
+  height: 100px;
+}
+.hello.yeah:hover {
+  color: #28f;
+}
+.hello.yeah#where {
   box-shadow: 10px 10px #09c;
 }
 .yeah .hello {
@@ -16,6 +28,9 @@
 .yeah.hello {
   background: #09c;
 }
-.yeah.hello .nope {
+.yeah .hello .nope {
+  user-select: none;
+}
+.yeah .hello.nope {
   user-select: none;
 }

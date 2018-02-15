@@ -3,59 +3,8 @@ require "./ripper/*"
 module Ripper
   extend self
 
-  class Selector
-    property :line, :name, :properties, :selectors, :parent, :indent
-
-    @parent     : (Selector|Nil)
-    @line       : String
-    @indent     : Int32
-    @name       : String
-    @root       : Bool
-    @properties : Array(String)
-    @selectors  : Array(Selector)
-    @expanded   : String = ""
-
-    def initialize(@line, **options)
-      @name       = @line.lstrip
-      @parent     = options[:parent]?
-      @root       = options[:root]? ? true : false
-      @properties = options[:properties]? || [] of String
-      @selectors  = options[:selectors]?  || [] of Selector
-      @indent     = @line.partition(/^\s*/)[1].size
-    end
-
-    # .hello
-    #   & .there        => .hello .there { ... }
-    #   &.there         => .hello.there { ... }
-    #   .there & .here  => .there .hello .there { ... }
-
-    def expand
-      return @expanded unless @expanded.empty?
-
-      tmp_parent = parent
-      return @expanded = name unless tmp_parent
-      return @expanded = name if tmp_parent.root?
-
-      return @expanded = [tmp_parent.expand, name.tr("&", "")].join if name.starts_with? '&'
-      return @expanded = [name.tr("&", ""), tmp_parent.expand].join if name.ends_with? '&'
-      return @expanded = name.sub "&", tmp_parent.expand            if name.includes? '&'
-
-      @expanded = [tmp_parent.expand, name].join
-    end
-
-    def root?
-      @root
-    end
-  end
-
-  def line_type(line : String)
-    return :comment   if line =~ /^(?:#\s|\s*\/\*)/
-    return :selector  if line =~ /^\s*[&#.]/
-    :property
-  end
-
   def parse(content : String)
-    root            = Selector.new ":root", root: true
+    root            = Selector.new "", root: true
     last_selector   = root
     last_sel_indent = 0
 
@@ -88,8 +37,8 @@ module Ripper
 
         last_selector = current
       when :property
-        last_selector.properties << line
-      when :comment
+        last_selector.properties << line.tr ";", ""
+      when :comment, :close_bracket
       end
     end
 
@@ -102,7 +51,7 @@ module Ripper
     unless selector.root? || selector.properties.none?
       result += selector.expand + " {\n"
       selector.properties.each do |prop|
-        result += "  " + prop.lstrip + ";\n"
+        result += "  " + prop.strip + ";\n"
       end
       result += "}\n"
     end
@@ -115,9 +64,15 @@ module Ripper
 
     result
   end
+
+  def line_type(line : String)
+    return :close_bracket if line =~ /^\s*\}/
+    return :comment       if line =~ /^(?:#\s|\s*\/\*|\/\/)/
+    return :selector      if line =~ /^\s*[&#.]/
+    :property
+  end
 end
 
 SAMPLE  = File.read File.join(__DIR__, "../", "spec", "files", "input.rip")
-
 puts Ripper.parse SAMPLE
 
