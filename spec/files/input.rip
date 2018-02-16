@@ -7,6 +7,12 @@
 
   height: over 90000;;
 
+  span
+    height: 20px
+
+  summary
+    yolo: true;
+
   &&
     margin-left: 20px
 

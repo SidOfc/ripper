@@ -37,7 +37,7 @@ module Ripper
 
         last_selector = current
       when :property
-        last_selector.properties << line.tr ";", ""
+        last_selector.properties << line.strip.tr ";", ""
       when :comment, :close_bracket
       end
     end
@@ -51,7 +51,7 @@ module Ripper
     unless selector.root? || selector.properties.none?
       result += selector.expand + " {\n"
       selector.properties.each do |prop|
-        result += "  " + prop.strip + ";\n"
+        result += "  " + prop + ";\n"
       end
       result += "}\n"
     end
@@ -68,11 +68,13 @@ module Ripper
   def line_type(line : String)
     return :close_bracket if line =~ /^\s*\}/
     return :comment       if line =~ /^(?:#\s|\s*\/\*|\/\/)/
-    return :selector      if line =~ /^\s*[&#.]/
+    return :selector      if line =~ /^\s*[&#.]/ || HTML_TAGS.includes? line.strip.split(' ')[0].downcase
     :property
   end
 end
 
-SAMPLE  = File.read File.join(__DIR__, "../", "spec", "files", "input.rip")
+# puts Ripper::HTML_TAGS
+
+SAMPLE = File.read File.join(__DIR__, "../", "spec", "files", "input.rip")
 puts Ripper.parse SAMPLE
 
