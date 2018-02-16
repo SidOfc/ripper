@@ -1,3 +1,5 @@
+require "./property"
+
 module Ripper
   class Selector
     property :line, :name, :properties, :selectors, :parent, :indent
@@ -7,7 +9,7 @@ module Ripper
     @indent     : Int32
     @name       : String
     @root       : Bool
-    @properties : Array(String)
+    @properties : Array(Property)
     @selectors  : Array(Selector)
     @expanded   : String = ""
 
@@ -15,9 +17,32 @@ module Ripper
       @name       = @line.tr("{", "").strip
       @parent     = options[:parent]?
       @root       = options[:root]? ? true : false
-      @properties = options[:properties]? || [] of String
+      @properties = options[:properties]? || [] of Property
       @selectors  = options[:selectors]?  || [] of Selector
       @indent     = @line.partition(/^\s*/)[1].size
+    end
+
+    def render
+      if root? || properties.none?
+        output = ""
+      else
+        output = render_self
+      end
+
+      selectors.each { |sel| output += sel.render }
+      output
+    end
+
+    def render_self
+      output = expand + " {\n"
+
+      properties.each do |prop|
+        prop.with_prefixes.each do |prefix|
+          output += "  " + prefix + "\n"
+        end
+      end
+
+      output + "}\n"
     end
 
     def expand

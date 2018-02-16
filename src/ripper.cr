@@ -1,4 +1,8 @@
-require "./ripper/*"
+require "./ripper/version"
+require "./ripper/html_tags"
+
+require "./ripper/selector"
+require "./ripper/property"
 
 module Ripper
   extend self
@@ -37,32 +41,12 @@ module Ripper
 
         last_selector = current
       when :property
-        last_selector.properties << line.strip.tr ";", ""
+        last_selector.properties << Property.new line
       when :comment, :close_bracket
       end
     end
 
-    format root
-  end
-
-  def format(selector : Selector)
-    result = ""
-
-    unless selector.root? || selector.properties.none?
-      result += selector.expand + " {\n"
-      selector.properties.each do |prop|
-        result += "  " + prop + ";\n"
-      end
-      result += "}\n"
-    end
-
-    if (selector.selectors.any?)
-      selector.selectors.each do |selector|
-        result += format selector
-      end
-    end
-
-    result
+    root.render
   end
 
   def line_type(line : String)
@@ -77,4 +61,3 @@ end
 
 SAMPLE = File.read File.join(__DIR__, "../", "spec", "files", "input.rip")
 puts Ripper.parse SAMPLE
-
