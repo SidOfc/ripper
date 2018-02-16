@@ -57,7 +57,7 @@ module Ripper
   end
 end
 
-# puts Ripper::HTML_TAGS
-
-SAMPLE = File.read File.join(__DIR__, "../", "spec", "files", "input.rip")
-puts Ripper.parse SAMPLE
+puts Ripper.parse "
+.hello
+  border-radius: 10px
+"

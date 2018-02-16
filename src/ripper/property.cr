@@ -1,3 +1,5 @@
+require "./prefixed"
+
 module Ripper
   struct Property
     property :name, :value
@@ -14,9 +16,20 @@ module Ripper
     end
 
     def with_prefixes
-      return [] of String unless val = value
+      result = [] of String
 
-      [name + ": " + val + ";"]
+      return result unless val = value
+
+      tmp_name = name + ": " + val + ";"
+
+      if PREFIXED.includes? name
+        PREFIXES.each_with_object result do |prefix|
+          result << "-#{prefix}-#{tmp_name}"
+        end
+      end
+
+      result << tmp_name
+      result
     end
   end
 end
