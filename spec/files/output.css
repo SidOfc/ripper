@@ -3,9 +3,22 @@
 }
 .hello .there {
   padding: 10px;
+  height: over 90000;
+}
+.hello span {
+  height: 20px;
+}
+.hello summary {
+  yolo: true;
+}
+.hello + .hello {
+  margin-left: 20px;
 }
 .hello.yeah #there {
   color: #09c;
+}
+.hello.yeah #there + #there {
+  color: #d22;
 }
 .hello.yeah #there.yolo {
   width: 200rem;
@@ -19,7 +32,7 @@
 .hello.yeah:hover {
   color: #28f;
 }
-.hello.yeah#where {
+.hello.yeah #where {
   box-shadow: 10px 10px #09c;
 }
 .yeah .hello {
