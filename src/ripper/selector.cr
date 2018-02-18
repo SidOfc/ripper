@@ -37,8 +37,11 @@ module Ripper
       output = expand + " {\n"
 
       properties.each do |prop|
-        prop.with_prefixes.each do |prefix|
-          output += "  " + prefix + "\n"
+        prefixed_props, prefixed_vals = prop.with_prefixes
+        prefixed_props.each do |prefixed_prop|
+          prefixed_vals.each do |prefixed_val|
+            output += "#{prefixed_prop}: #{prefixed_val};\n"
+          end
         end
       end
 

@@ -59,5 +59,6 @@ end
 
 puts Ripper.parse "
 .hello
-  border-radius: 10px
+  cursor: grab;
+  border-radius: 10px;
 "

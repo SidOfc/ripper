@@ -16,20 +16,7 @@ module Ripper
     end
 
     def with_prefixes
-      result = [] of String
-
-      return result unless val = value
-
-      tmp_name = name + ": " + val + ";"
-
-      if PREFIXED.includes? name
-        PREFIXES.each_with_object result do |prefix|
-          result << "-#{prefix}-#{tmp_name}"
-        end
-      end
-
-      result << tmp_name
-      result
+      Prefixed[name, value]
     end
   end
 end
