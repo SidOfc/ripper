@@ -8,7 +8,7 @@ module Ripper
     @value : String
 
     def initialize(line, **options)
-      @name, @value = line.tr(";", "").strip.split(":", 2).map(&.strip)
+      @name, @value = line.tr(";", "").strip.split(/[:\s]/, 2).map(&.strip)
     end
 
     def with_prefixes

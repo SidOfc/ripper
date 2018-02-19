@@ -1,54 +1,58 @@
-$spacing = 10px
-$blue    = #09c
-$gray    = #ccc
-$green   = #6fa
+$spacing 10px
+$blue    #09c
+$gray    #ccc
+$green   #6fa
 
-.hello
-  margin: $spacing
+.there
+  margin $spacing
+  padding 20px
 
-  @each col in [1, 2, 3]
-    &.there-$col
-      padding: $spacing
+  .dada
+    background-color #09c
 
-  height: $spacing
+//   @each col in [1, 2, 3]
+//     &.there-$col
+//       padding $spacing
 
-  span
-    height: $spacing
+//   height $spacing
 
-  &&
-    margin-left: $spacing
+//   span
+//     height $spacing
 
-  &.yeah
+//   &&
+//     margin-left $spacing
 
-    & #there
-      color: $gray
+//   &.yeah
 
-      &&
-        color: $green
+//     & #there
+//       color $gray
 
-      &.yolo
-        width: 200rem
+//       &&
+//         color $green
 
-        .hashakjshasjkdhakjsd &
-          display: flex
+//       &.yolo
+//         width 200rem
 
-          .so & #complex
-            height: 100px
+//         .hashakjshasjkdhakjsd &
+//           display flex
 
-    &:hover
-      color: $blue
+//           .so & #complex
+//             height 100px
 
-    #where
-      box-shadow: 10px 10px $blue
+//     &:hover
+//       color $blue
 
-  .yeah &
-    background: $blue
+//     #where
+//       box-shadow 10px 10px $blue
 
-  .yeah&
-    background: $green
+//   .yeah &
+//     background $blue
 
-  .yeah & .nope
-    user-select: none
+//   .yeah&
+//     background $green
 
-  .yeah &.nope
-    user-select: none
+//   .yeah & .nope
+//     user-select none
+
+//   .yeah &.nope
+//     user-select none

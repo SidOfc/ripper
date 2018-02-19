@@ -34,7 +34,7 @@ module Ripper
     end
 
     def render_self(locals = {} of String => String)
-      output = expand.gsub(/\$[a-z_-]+[\w\-]*/i) { |n| locals[n[1..-1]]? || n } + " {\n"
+      output = expand.tr(",", "").gsub(/\$[a-z_-]+[\w\-]*/i) { |n| locals[n[1..-1]]? || n } + " {\n"
 
       properties.each do |prop|
         prefixed_props, prefixed_vals = prop.with_prefixes

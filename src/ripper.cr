@@ -27,9 +27,8 @@ module Ripper
   end
 
   def parse(content)
-    root            = Selector.new "", root: true
-    last_selector   = root
-    last_sel_indent = 0
+    root          = Selector.new "", root: true
+    last_selector = root
 
     content.split("\n").each do |line|
       case line_type line
@@ -60,7 +59,7 @@ module Ripper
       when :property
         last_selector.properties << Property.new process_vars(line)
       when :variable
-        key, value = line.split("=").map(&.tr("&;", "").strip)
+        key, value = line.split(/\s+/).map(&.strip)
         var key, value
       end
     end
@@ -69,17 +68,10 @@ module Ripper
   end
 
   def line_type(line : String)
-    return :property if line =~ /^\s*[a-z_-][\w\-]*:[^;]+;?/i
     return :selector if line =~ /^\s*[&@#.]/ || HTML_TAGS.includes? line.strip.split(' ').first.downcase
-    return :variable if line =~ /^\s*\$[a-z_][\w\-]*\s*=[^;]+;?/i
+    return :property if line =~ /^\s*[a-z_-][\w\-]*[:\s][^;]+;?/i
+    return :variable if line =~ /^\s*\$[a-z_][\w\-]*\s+[^;]+;?/i
   end
 end
 
 puts Ripper.parse ARGF.gets_to_end
-# looper = Ripper::Selector.new "@each item in [yoda, 2, 3]"
-# dummy  = Ripper::Selector.new ".hello-$item"
-
-# dummy .properties << Ripper::Property.new "margin: 10px"
-# looper.selectors  << dummy
-
-# puts looper.render
