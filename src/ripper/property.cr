@@ -4,15 +4,11 @@ module Ripper
   struct Property
     property :name, :value
 
-    @line  : String
     @name  : String
-    @value : (String|Nil)
+    @value : String
 
-    def initialize(@line, **options)
-      line = @line.tr(";", "").strip.split ":", 2
-
-      @name  = line[0].strip
-      @value = line[1]? && line[1].strip
+    def initialize(line, **options)
+      @name, @value = line.tr(";", "").strip.split(":", 2).map(&.strip)
     end
 
     def with_prefixes

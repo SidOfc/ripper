@@ -1,28 +1,30 @@
-.hello {
-  margin: 10px;
+$spacing = 10px
+$blue    = #09c
+$gray    = #ccc
+$green   = #6fa
 
-  & .there {
-    padding: 10px
-  }
+.hello
+  margin: $spacing
 
-  height: over 90000;;
+  @each col in [1, 2, 3]
+    &.there-$col
+      padding: $spacing
+
+  height: $spacing
 
   span
-    height: 20px
-
-  summary
-    yolo: true;
+    height: $spacing
 
   &&
-    margin-left: 20px
+    margin-left: $spacing
 
   &.yeah
 
     & #there
-      color: #09c
+      color: $gray
 
       &&
-        color: #d22
+        color: $green
 
       &.yolo
         width: 200rem
@@ -34,20 +36,19 @@
             height: 100px
 
     &:hover
-      color: #28f
+      color: $blue
 
     #where
-      box-shadow: 10px 10px #09c
+      box-shadow: 10px 10px $blue
 
   .yeah &
-    background: #09c
+    background: $blue
 
   .yeah&
-    background: #09c
+    background: $green
 
   .yeah & .nope
     user-select: none
 
   .yeah &.nope
     user-select: none
-}

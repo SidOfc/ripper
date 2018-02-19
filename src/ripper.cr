@@ -1,23 +1,40 @@
 require "./ripper/version"
 require "./ripper/html_tags"
 
+require "./ripper/options"
 require "./ripper/selector"
 require "./ripper/property"
 
 module Ripper
   extend self
 
-  def parse(content : String)
+  @@vars = {} of String => String
+
+  def vars
+    @@vars
+  end
+
+  def var(name)
+    @@vars[name]?
+  end
+
+  def var(name, value)
+    @@vars[name] = value
+  end
+
+  def process_vars(line)
+    line.gsub(/\$[a-z_\-][\w\-]*/i) { |n| var(n) || n }
+  end
+
+  def parse(content)
     root            = Selector.new "", root: true
     last_selector   = root
     last_sel_indent = 0
 
     content.split("\n").each do |line|
-      next if line.empty?
-
       case line_type line
       when :selector
-        current = Selector.new line
+        current = Selector.new process_vars(line)
 
         if current.indent > last_selector.indent
           current.parent = last_selector
@@ -41,8 +58,10 @@ module Ripper
 
         last_selector = current
       when :property
-        last_selector.properties << Property.new line
-      when :comment, :close_bracket
+        last_selector.properties << Property.new process_vars(line)
+      when :variable
+        key, value = line.split("=").map(&.tr("&;", "").strip)
+        var key, value
       end
     end
 
@@ -50,15 +69,17 @@ module Ripper
   end
 
   def line_type(line : String)
-    return :close_bracket if line =~ /^\s*\}/
-    return :comment       if line =~ /^(?:#\s|\s*\/\*|\/\/)/
-    return :selector      if line =~ /^\s*[&#.]/ || HTML_TAGS.includes? line.strip.split(' ')[0].downcase
-    :property
+    return :property if line =~ /^\s*[a-z_-][\w\-]*:[^;]+;?/i
+    return :selector if line =~ /^\s*[&@#.]/ || HTML_TAGS.includes? line.strip.split(' ').first.downcase
+    return :variable if line =~ /^\s*\$[a-z_][\w\-]*\s*=[^;]+;?/i
   end
 end
 
-puts Ripper.parse "
-.hello
-  cursor: grab;
-  border-radius: 10px;
-"
+puts Ripper.parse ARGF.gets_to_end
+# looper = Ripper::Selector.new "@each item in [yoda, 2, 3]"
+# dummy  = Ripper::Selector.new ".hello-$item"
+
+# dummy .properties << Ripper::Property.new "margin: 10px"
+# looper.selectors  << dummy
+
+# puts looper.render
