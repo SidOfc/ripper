@@ -3,11 +3,25 @@ $blue    #09c
 $gray    #ccc
 $green   #6fa
 
-@iterate 10 using first
-  @each second of [$blue, 2]
+.fuuuu,
+.yoo,
+.son
+  color #09c
+
+  .cookie,
+    fill #d22
+
+  .there
+    border 1px solid black
+
+@iterate 2 using first
+  @each second of [a, b]
     .selector-${first}-${second},
     #identifier-${first}-${second}
       color $blue
+
+      &.cookie
+        win true
 
 .there
   margin $spacing
@@ -64,10 +78,14 @@ $green   #6fa
 .there
   margin $spacing
   padding 20px
+  margin 1.5rem
+  padding 20px
 
   .dada
     background-color #09c
     height $spacing
+    margin 1.5rem
+    padding 20px
 
   span
     height $spacing

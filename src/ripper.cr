@@ -43,9 +43,17 @@ module Ripper
         previous = parents.last
         current  = Selector.new line
 
-        if line.ends_with? ","
+        if !line[1..-2].includes?(",") && line.ends_with? ","
           commas << current
           next
+        elsif !current.statement && line.includes? ","
+          commas  = line.split(/,\s*/).map { |comma| Selector.new comma }
+          next commas.pop if commas.last.name.empty?
+          current = commas.pop
+
+          if commas.any?
+            current.indent = commas.first.indent
+          end
         end
 
         if current.indent > previous.indent
@@ -73,6 +81,19 @@ module Ripper
           commas = [] of Selector
         end
       when :property
+        if commas.any?
+          current = commas.pop
+          current.commas = commas.map do |comma|
+            comma.target           =  current
+            parents.last.selectors << comma
+            comma.name
+          end
+
+          parents.last.selectors << current
+          parents << current
+          commas = [] of Selector
+        end
+
         parents.last.properties << Property.new process_vars line, vars
       when :variable
         key, value = line.strip.split " ", 2
@@ -80,15 +101,27 @@ module Ripper
       end
     end
 
-    root.render [] of String, vars
+    {root, vars}
+  end
+
+  def loop_type(line : String)
+    case line.split(/[ \t]+/, 2).first.strip
+    when "@each"    then :each
+    when "@loop"    then :loop
+    when "@iterate" then :iterate
+    else :unknown
+    end
   end
 
   def line_type(line : String)
     return :selector if line =~ /^\s*[+&@#.]/ || HTML_TAGS.includes?(line.strip.split(' ').first.downcase)
     return :property if line =~ /^\s*[a-z_-][\w\-]*[:\s][^;]+;?/i
     return :variable if line =~ /^\s*\$[a-z_-][\w\-]*[:\s][^;]+;?/i
-    return :line
+    return :unknown
   end
 end
 
-puts Ripper.parse ARGF.gets_to_end
+tree, vars = Ripper.parse ARGF.gets_to_end
+
+# pp tree
+puts tree.render [] of String, vars

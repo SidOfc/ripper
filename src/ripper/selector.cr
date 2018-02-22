@@ -43,15 +43,15 @@ module Ripper
     end
 
     def render_statement(locals = {} of String => Variable, &block : Hash(String, Variable) -> String)
-      type, line = name.split /[ \t]+/, 2
+      name, line = name.split /[ \t]+/, 2
 
-      case type
-      when "@each"
-        info = line.split /[ \t]+/, 3
-        handle_each info[0], info[2], locals, &block
-      when "@loop", "@iterate"
-        info = line.split /[ \t]+/, 3
-        handle_loop info[2], info[0], locals, &block
+      case Ripper.loop_type name
+      when :each
+        info = line.split(/using|of/i).map(&.strip)
+        handle_each info.first, info.last, locals, &block
+      when :loop, :iterate
+        info = line.split(/using|of/i).map(&.strip)
+        handle_loop info.last, info.first, locals, &block
       else [block.call(locals)]
       end
     end
@@ -59,7 +59,7 @@ module Ripper
     def handle_each(key, value, locals = {} of String => Variable, &block : Hash(String, Variable) -> String)
       var_key = "$" + key.strip("$")
 
-      value[1..-2].split(/,\s*/).map do |current_value|
+      value.lstrip("[ ").rstrip(" ]").split(/,\s*/).map do |current_value|
         locals[var_key] = Variable.new key, Ripper.process_vars(current_value, locals)
         block.call locals
       end
