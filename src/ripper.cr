@@ -4,19 +4,36 @@ require "./ripper/html_tags"
 require "./ripper/options"
 require "./ripper/selector"
 require "./ripper/property"
+require "./ripper/variable"
 
 module Ripper
   extend self
 
-  def process_vars(line, vars = {} of String => String)
-    line.gsub(/\$[^\s]+/) { |m|  vars[m]? || "-ripper-missing(#{m})" }
+  def process_selector_vars(input, vars = {} of String => Variable)
+    input.gsub(/\$\{[^\}]+\}/) do |match|
+      if var = vars["$" + match[2..-2]]?
+        var.value
+      else
+        match
+      end
+    end
+  end
+
+  def process_vars(input, vars = {} of String => Variable)
+    input.gsub(/\$[^\s,]+/) do |match|
+      if var = vars[match]?
+        var.value
+      else
+        "(#{match})"
+      end
+    end
   end
 
   def parse(content)
     root    = Selector.new ""
     parents = [root] of Selector
     commas  = [] of Selector
-    vars    = {} of String => String
+    vars    = {} of String => Variable
 
     content.split("\n").each do |line|
       next if line.empty?
@@ -59,11 +76,11 @@ module Ripper
         parents.last.properties << Property.new process_vars line, vars
       when :variable
         key, value = line.strip.split " ", 2
-        vars[key] = value
+        vars[key]  = Variable.new key, value
       end
     end
 
-    root
+    root.render [] of String, vars
   end
 
   def line_type(line : String)
@@ -74,10 +91,4 @@ module Ripper
   end
 end
 
-tree = Ripper.parse ARGF.gets_to_end
-sel  = Ripper::Selector.new ""
-
-# puts sel.expand [".woohoo", ".there &", "+ &"]
-# puts sel.expand [".there", "&&"]
-
-puts tree.render
+puts Ripper.parse ARGF.gets_to_end

@@ -1,8 +1,9 @@
 require "./property"
+require "./variable"
 
 module Ripper
   class Selector
-    property :line, :name, :properties, :selectors, :indent, :target, :commas
+    property :line, :name, :properties, :selectors, :indent, :target, :commas, :statement
 
     @target     : (Selector|Nil)
     @name       = ""
@@ -10,54 +11,73 @@ module Ripper
     @commas     = [] of String
     @properties = [] of Property
     @selectors  = [] of Selector
+    @statement  = false
 
     def initialize(line, **options)
-      @name       = line.tr("{,", "").strip
+      @indent     = line.partition(/^\s*/)[1].size
+      @name       = line.lstrip.rstrip "{, "
+      @statement  = name.starts_with? "@"
       @target     = options[:target]?
       @properties = options[:properties]? || [] of Property
       @selectors  = options[:selectors]?  || [] of Selector
-      @indent     = line.partition(/^\s*/)[1].size
     end
 
     def target
       @target || self
     end
 
-    def render(names = [] of String)
-      targets = names + [name]
-      content = target == self ? target.render_self(targets) : ""
+    def render(names = [] of String, locals = {} of String => Variable)
+      if statement
+        render_statement locals do |vars|
+          targets = statement ? names : names + [Ripper.process_selector_vars(name, vars)]
+          content = target == self ? target.render_self(targets, vars) : ""
 
-      content + target.selectors.map(&.render(targets).as(String)).join
-    end
+          content + target.selectors.map(&.render(targets, vars).as(String)).join
+        end.join
+      else
+        targets = statement ? names : names + [name]
+        content = target == self ? target.render_self(targets, locals) : ""
 
-    def expand(names = [] of String)
-      selector = ""
-      ending   = ""
-
-      names.each do |name|
-        case name
-        when /^(?:&?\s*\+\s*&|&&)$/
-          selector += " + #{ending.strip}"
-        when /^&/
-          selector += ending = name.tr "&", ""
-        when /&$/
-          ending   = name.tr "&", ""
-          selector = ending + selector.lstrip
-        when /&/
-          selector = name.sub "&", selector.strip
-          ending   = selector.split(" ").last
-        else
-          selector += ending = " #{name}"
-        end
+        content + target.selectors.map(&.render(targets, locals).as(String)).join
       end
-
-      selector.strip
     end
 
-    def render_self(names = [] of String)
+    def render_statement(locals = {} of String => Variable, &block : Hash(String, Variable) -> String)
+      type, line = name.split /[ \t]+/, 2
+
+      case type
+      when "@each"
+        info = line.split /[ \t]+/, 3
+        handle_each info[0], info[2], locals, &block
+      when "@loop", "@iterate"
+        info = line.split /[ \t]+/, 3
+        handle_loop info[2], info[0], locals, &block
+      else [block.call(locals)]
+      end
+    end
+
+    def handle_each(key, value, locals = {} of String => Variable, &block : Hash(String, Variable) -> String)
+      var_key = "$" + key.strip("$")
+
+      value[1..-2].split(/,\s*/).map do |current_value|
+        locals[var_key] = Variable.new key, Ripper.process_vars(current_value, locals)
+        block.call locals
+      end
+    end
+
+    def handle_loop(key, value, locals = {} of String => Variable, &block : Hash(String, Variable) -> String)
+      var_key = "$" + key.strip("$")
+      count   = value.gsub(/[^\d]+/, "").to_i
+
+      count.times.map do |idx|
+        locals[var_key] = Variable.new key, (idx + 1).to_s
+        block.call locals
+      end
+    end
+
+    def render_self(names = [] of String, locals = {} of String => Variable)
       return "" if target.properties.none? || names.empty?
-      sub    = expand names[0..-2]
-      output = (commas + [names.last]).map { |n| expand(names[0..-2] + [n]) }.join(",\n") + " {\n"
+      output = (commas + [names.last]).map { |n| expand(names[0..-2] + [n], locals) }.join(",\n") + " {\n"
 
       target.properties.each do |prop|
         prefixed_props, prefixed_vals = prop.with_prefixes
@@ -69,6 +89,31 @@ module Ripper
       end
 
       output + "}\n"
+    end
+
+    def expand(names = [] of String, locals = {} of String => Variable)
+      selector = ""
+      ending   = ""
+
+      names.each do |name|
+        tmp = Ripper.process_selector_vars name, locals
+        case tmp
+        when /^(?:&?\s*\+\s*&|&&)$/
+          selector += " + #{ending.strip}"
+        when /^&/
+          selector += ending = tmp.tr "&", ""
+        when /&$/
+          ending   = tmp.tr "&", ""
+          selector = ending + selector.lstrip
+        when /&/
+          selector = tmp.sub "&", selector.strip
+          ending   = selector.split(" ").last
+        else
+          selector += ending = " #{tmp}"
+        end
+      end
+
+      selector.strip
     end
   end
 end
