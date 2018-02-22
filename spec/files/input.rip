@@ -9,12 +9,52 @@ $green   #6fa
 
   .dada
     background-color #09c
+    height $spacing
 
-//   @each col in [1, 2, 3]
-//     &.there-$col
-//       padding $spacing
+  .hlhlhl
+    margin-left $spacing
 
-//   height $spacing
+  .kwjashdjak
+    margin-left $spacing
+
+  span
+    height $spacing
+
+  .yeah
+
+    & #there
+      color $gray
+
+      .onemorelvl
+        fill #ddd
+
+  .han
+    border-radius 3px
+
+// .yoda,
+// .wookie
+//   margin 1.5rem
+//   padding 20px
+
+//   .hello& .there,
+//   .rediculous &,
+//   .there
+//     background-color #09c
+
+//     + &
+//       background-color #28d
+
+//       .yoyo,
+//       .vodka
+//         color black
+
+// .there
+//   margin $spacing
+//   padding 20px
+
+//   .dada
+//     background-color #09c
+//     height $spacing
 
 //   span
 //     height $spacing
@@ -22,7 +62,7 @@ $green   #6fa
 //   &&
 //     margin-left $spacing
 
-//   &.yeah
+//   .yeah
 
 //     & #there
 //       color $gray
