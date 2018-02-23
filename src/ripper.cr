@@ -9,31 +9,11 @@ require "./ripper/variable"
 module Ripper
   extend self
 
-  def process_selector_vars(input, vars = {} of String => Variable)
-    input.gsub(/\$\{[^\}]+\}/) do |match|
-      if var = vars["$" + match[2..-2]]?
-        var.value
-      else
-        match
-      end
-    end
-  end
-
-  def process_vars(input, vars = {} of String => Variable)
-    input.gsub(/\$[^\s,]+/) do |match|
-      if var = vars[match]?
-        var.value
-      else
-        "(#{match})"
-      end
-    end
-  end
-
   def parse(content)
     root    = Selector.new ""
     parents = [root] of Selector
     commas  = [] of Selector
-    vars    = {} of String => Variable
+    env     = {} of String => Variable
 
     content.split("\n").each do |line|
       next if line.empty?
@@ -94,23 +74,14 @@ module Ripper
           commas = [] of Selector
         end
 
-        parents.last.properties << Property.new process_vars line, vars
+        parents.last.properties << Property.new line
       when :variable
         key, value = line.strip.split " ", 2
-        vars[key]  = Variable.new key, value
+        env[key]   = Variable.new key, value
       end
     end
 
-    {root, vars}
-  end
-
-  def loop_type(line : String)
-    case line.split(/[ \t]+/, 2).first.strip
-    when "@each"    then :each
-    when "@loop"    then :loop
-    when "@iterate" then :iterate
-    else :unknown
-    end
+    {root, env}
   end
 
   def line_type(line : String)
@@ -119,9 +90,19 @@ module Ripper
     return :variable if line =~ /^\s*\$[a-z_-][\w\-]*[:\s][^;]+;?/i
     return :unknown
   end
+
+  def process_vars(input, env = {String => Variable})
+    input.gsub(/\$[^\s,]+/) do |match|
+      if var = env[match]?
+        var.value
+      else
+        "-ripper-unknown(#{match})"
+      end
+    end
+  end
 end
 
-tree, vars = Ripper.parse ARGF.gets_to_end
+tree, env = Ripper.parse ARGF.gets_to_end
 
 # pp tree
-puts tree.render [] of String, vars
+puts tree.render [] of String, env

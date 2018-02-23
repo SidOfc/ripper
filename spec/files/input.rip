@@ -3,118 +3,18 @@ $blue    #09c
 $gray    #ccc
 $green   #6fa
 
-.fuuuu,
-.yoo,
-.son
+.selector
   color #09c
 
-  .cookie,
+  .first,
     fill #d22
 
-  .there
+  .second,
+  .third
     border 1px solid black
 
-@iterate 2 using first
-  @each second of [a, b]
-    .selector-${first}-${second},
-    #identifier-${first}-${second}
-      color $blue
-
-      &.cookie
-        win true
-
-.there
-  margin $spacing
-  padding 20px
-
-  .dada,
-  .yoda
-    background-color #09c
-    height $spacing
-
-    .worldly
-      color #200
-
-      &.yoda
-        color #333
-
-  .hlhlhl
-    margin-left $spacing
-
-  .kwjashdjak
-    margin-left $spacing
-
-  span
-    height $spacing
-
-  .yeah
-
-    & #there
-      color $gray
-
-      .onemorelvl
-        fill #ddd
-
-  .han
-    border-radius 3px
-
-.yoda,
-.wookie
-  margin 1.5rem
-  padding 20px
-
-  .hello& .there,
-  .rediculous &,
-  .there
-    background-color #09c
-
-    + &
-      background-color #28d
-
-      .yoyo,
-      .vodka
-        color black
-
-.there
-  margin $spacing
-  padding 20px
-  margin 1.5rem
-  padding 20px
-
-  .dada
-    background-color #09c
-    height $spacing
-    margin 1.5rem
-    padding 20px
-
-  span
-    height $spacing
-
-  &&
-    margin-left $spacing
-
-  .yeah
-
-    & #there
-      color $gray
-
-      &&
-        color $green
-
-      &.yolo
-        width 200rem
-
-        .hashakjshasjkdhakjsd &
-          display flex
-
-          .so & #complex
-            height 100px
-
-    &:hover
-      color $blue
-
-    #where
-      box-shadow 10px 10px $blue
+    .child
+      color #28f
 
   .yeah &
     background $blue
